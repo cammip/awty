@@ -1,5 +1,6 @@
 package edu.uw.ischool.cammip.awty
 
+import android.app.Activity
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Button
@@ -13,6 +14,8 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.os.SystemClock
+import android.util.Log
+import kotlin.coroutines.coroutineContext
 
 class MainActivity : AppCompatActivity() {
     private lateinit var button: Button
@@ -55,8 +58,7 @@ class MainActivity : AppCompatActivity() {
             } else if (button.text.toString() != "Stop"){
                 button.text = "Stop"
 
-                val caption = "${num.text.toString()}: ${message.text.toString()}"
-                startAlarm(caption)
+                sendBroadcast(intent)
 
                 alarmManager.setRepeating(
                     AlarmManager.ELAPSED_REALTIME,
@@ -68,18 +70,15 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun startAlarm(caption: String) {
-        val intent = Intent(this, MyAlarm::class.java)
-        intent.putExtra("msg", caption)
-        sendBroadcast(intent)
-    }
-
     class MyAlarm : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
-            val msg = intent.getStringExtra("msg")
-            val caption = msg
+            val num = context.applicationContext.findViewById<EditText>(R.id.edit2)
+            //val msg = (context as Activity).findViewById<EditText>(R.id.edit1)
+            //val message = "${num.text.toString()}: ${msg.text.toString()}"
 
-            Toast.makeText(context, caption, Toast.LENGTH_SHORT).show()
+            val message = num.toString()
+            Log.d("msg", message)
+            Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
 
         }
     }
