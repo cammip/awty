@@ -40,7 +40,7 @@ class MainActivity : AppCompatActivity() {
             if(button.text.toString() == "Stop") {
                 unregisterReceiver(alarmReceiver)
                 alarmReceiver = null
-                Toast.makeText(this, "Alarm stopped", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Alerts stopped", Toast.LENGTH_SHORT).show()
                 button.text = "Start"
             }
 
@@ -49,6 +49,7 @@ class MainActivity : AppCompatActivity() {
                 TextUtils.isEmpty(message.text.toString())
                 || TextUtils.isEmpty(num.text.toString())
                 || TextUtils.isEmpty(nag.text.toString())) {
+
                 val toastError = Toast.makeText(this@MainActivity, "Incorrect values inputted",
                     Toast.LENGTH_LONG)
                 toastError.show()
@@ -76,10 +77,11 @@ class MainActivity : AppCompatActivity() {
                     registerReceiver(alarmReceiver, filter)
                 }
 
+                val numInt = num.text.toString().toInt()
                 alarmManager.setRepeating(
                     AlarmManager.RTC_WAKEUP,
-                    System.currentTimeMillis() + num.text.toString().toInt(),
-                    num.text.toString().toLong() * 60000,
+                    System.currentTimeMillis() + numInt * 60000L,
+                    numInt * 60000L,
                     pendingIntent)
             }
         }
