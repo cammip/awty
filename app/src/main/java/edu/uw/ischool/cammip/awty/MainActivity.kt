@@ -84,7 +84,7 @@ class MainActivity : AppCompatActivity() {
                                val number = PhoneNumberUtils.formatNumber(num.text.toString(), Locale.getDefault().country)
                                smsManager.sendTextMessage(number,
                                    null,
-                                   message.toString(),
+                                   message.text.toString(),
                                    null,
                                    null)
 
