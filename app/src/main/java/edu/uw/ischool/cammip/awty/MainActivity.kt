@@ -13,7 +13,15 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.telephony.SmsManager
+import android.Manifest.permission.SEND_SMS
+import android.content.pm.PackageManager
+import android.telephony.PhoneNumberUtils
 import android.util.Log
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
+import java.util.Locale
+import android.Manifest
 
 class MainActivity : AppCompatActivity() {
     private lateinit var button: Button
@@ -48,7 +56,9 @@ class MainActivity : AppCompatActivity() {
             else if(button.text.toString() == "Start" &&
                 TextUtils.isEmpty(message.text.toString())
                 || TextUtils.isEmpty(num.text.toString())
-                || TextUtils.isEmpty(lag.text.toString())) {
+                || (num.text.toString().length < 10)
+                || TextUtils.isEmpty(lag.text.toString())
+                || lag.text.toString().toInt() < 0) {
 
                 val toastError = Toast.makeText(this@MainActivity, "Incorrect values inputted",
                     Toast.LENGTH_LONG)
@@ -56,35 +66,49 @@ class MainActivity : AppCompatActivity() {
 
             //if data is valid, start alarm
             } else if (button.text.toString() != "Stop"){
+                button.text = "Stop"
                 Toast.makeText(applicationContext, "Alerts started", Toast.LENGTH_SHORT).show()
 
-                button.text = "Stop"
-                val alarmManager = applicationContext.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+               if (ContextCompat.checkSelfPermission(this, SEND_SMS) == PackageManager.PERMISSION_GRANTED) {
+                   val alarmManager = applicationContext.getSystemService(Context.ALARM_SERVICE) as AlarmManager
 
-                val intent = Intent(ALARM_ACTION)
-                val pendingIntent = PendingIntent.getBroadcast(applicationContext,
-                    0, intent, PendingIntent.FLAG_IMMUTABLE)
+                   val intent = Intent(ALARM_ACTION)
+                   val pendingIntent = PendingIntent.getBroadcast(applicationContext,
+                       0, intent, PendingIntent.FLAG_IMMUTABLE)
 
-                if(alarmReceiver == null) {
-                    alarmReceiver = object : BroadcastReceiver() {
-                        override fun onReceive(context: Context?, intent: Intent?) {
-                            Log.d("Test", "onReceive called")
-                            val msg = "${num.text.toString()}: ${message.text.toString()}"
-                            Toast.makeText(context, msg, Toast.LENGTH_LONG).show()
-                            Log.d("Test", "toast was toasted")
+                   if(alarmReceiver == null) {
+                       alarmReceiver = object : BroadcastReceiver() {
+                           override fun onReceive(context: Context?, intent: Intent?) {
 
-                        }
-                    }
-                    val filter = IntentFilter(ALARM_ACTION)
-                    registerReceiver(alarmReceiver, filter)
-                }
+                               val smsManager = SmsManager.getDefault()
+                               val number = PhoneNumberUtils.formatNumber(num.text.toString(), Locale.getDefault().country)
+                               smsManager.sendTextMessage(number,
+                                   null,
+                                   message.toString(),
+                                   null,
+                                   null)
 
-                val howLong = lag.text.toString().toInt()
-                alarmManager.setRepeating(
-                    AlarmManager.RTC_WAKEUP,
-                    System.currentTimeMillis() + howLong * 60000L,
-                    howLong * 60000L,
-                    pendingIntent)
+                               Log.i("Sent", "Message sent")
+                           }
+                       }
+                       val filter = IntentFilter(ALARM_ACTION)
+                       registerReceiver(alarmReceiver, filter)
+                   }
+
+                   val howLong = lag.text.toString().toInt()
+                   alarmManager.setRepeating(
+                       AlarmManager.RTC_WAKEUP,
+                       System.currentTimeMillis() + howLong * 60000L,
+                       howLong * 60000L,
+                       pendingIntent
+                   )
+               } else {
+                   ActivityCompat.requestPermissions(this, arrayOf(SEND_SMS), 1)
+                   ActivityCompat.requestPermissions(
+                       this,
+                       arrayOf(Manifest.permission.SEND_SMS),
+                       101)
+               }
             }
         }
     }
