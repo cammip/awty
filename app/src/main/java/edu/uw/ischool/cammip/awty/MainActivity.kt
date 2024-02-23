@@ -19,7 +19,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var button: Button
     private lateinit var message : EditText
     private lateinit var num: EditText
-    private lateinit var nag: EditText
+    private lateinit var lag: EditText
 
     @SuppressLint("UnspecifiedRegisterReceiverFlag")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -32,7 +32,7 @@ class MainActivity : AppCompatActivity() {
         button = findViewById(R.id.button)
         message = findViewById(R.id.edit1)
         num = findViewById(R.id.edit2)
-        nag = findViewById(R.id.edit3)
+        lag = findViewById(R.id.edit3)
         val ALARM_ACTION = "edu.uw.ischool.cammip.ALARM"
 
         button.setOnClickListener {
@@ -48,7 +48,7 @@ class MainActivity : AppCompatActivity() {
             else if(button.text.toString() == "Start" &&
                 TextUtils.isEmpty(message.text.toString())
                 || TextUtils.isEmpty(num.text.toString())
-                || TextUtils.isEmpty(nag.text.toString())) {
+                || TextUtils.isEmpty(lag.text.toString())) {
 
                 val toastError = Toast.makeText(this@MainActivity, "Incorrect values inputted",
                     Toast.LENGTH_LONG)
@@ -56,6 +56,8 @@ class MainActivity : AppCompatActivity() {
 
             //if data is valid, start alarm
             } else if (button.text.toString() != "Stop"){
+                Toast.makeText(applicationContext, "Alerts started", Toast.LENGTH_SHORT).show()
+
                 button.text = "Stop"
                 val alarmManager = applicationContext.getSystemService(Context.ALARM_SERVICE) as AlarmManager
 
@@ -77,11 +79,11 @@ class MainActivity : AppCompatActivity() {
                     registerReceiver(alarmReceiver, filter)
                 }
 
-                val numInt = num.text.toString().toInt()
+                val howLong = lag.text.toString().toInt()
                 alarmManager.setRepeating(
                     AlarmManager.RTC_WAKEUP,
-                    System.currentTimeMillis() + numInt * 60000L,
-                    numInt * 60000L,
+                    System.currentTimeMillis() + howLong * 60000L,
+                    howLong * 60000L,
                     pendingIntent)
             }
         }
